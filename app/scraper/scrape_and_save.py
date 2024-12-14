@@ -12,7 +12,7 @@ def remove_links_from_markdown(markdown_content):
 
 
 
-async def scrape_and_save_page(url, save_scraped_page_dir=".cache/scraped_data", database_file_name = "scrape_db.json", remove_links=True):
+async def scrape_and_save_page(url, page_title = "",save_scraped_page_dir=".cache/scraped_data", database_file_name = "scrape_db.json", remove_links=True):
     scraped_markdown, scrape_success = await markdown_scraper.markdown_scrape(url)
     saved_db = None
     saved_path = None 

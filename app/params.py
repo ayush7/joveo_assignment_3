@@ -8,3 +8,4 @@ LINKS_CACHE_DIR = ".cache/links_cache"      # Crawled links cache dir
 SCRAPE_CACHE_DIR = ".cache/scraped_data"    # Scraped pages cache dir 
 UNIQUE_LINKS_FILE = "unique_links.json"
 RAG_DATABASE_DIR = ".ragdb/chroma_db/"
+EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"

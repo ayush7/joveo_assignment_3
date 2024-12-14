@@ -3,6 +3,7 @@
 
 # Custom User files
 key.py
+.ragdb
 chroma_db/
 .gradio/
 *.pem

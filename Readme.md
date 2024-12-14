@@ -7,6 +7,7 @@
 ## Progress <br>
 
 Tested Module - :white_check_mark:
+Probably won't be able to finish :thumbsdown: 
 
 Crawler
 - [x] Write Crawler :white_check_mark:
@@ -20,16 +21,17 @@ Scraper
 
 RAG Module
 - [x] Database Creator Module
-- [ ] Retrival Module
-- [ ] Rerank Module/2 step retriver
-- [ ] Advanced Multi prompt retriver
+- [x] Retrival Module (Testing)
+- [x] Rerank Module/2 step retriver (Testing)
+- [ ] Advanced Multi prompt retriver :thumbsdown:
 
 Agents Module
-- [ ] Context Compression Agent
+- [ ] Context Compression Agent :thumbsdown:
 - [ ] RAG Agent
 - [x] Gemini Single Query Module (not tested)
 - [ ] OpenAI Single Query Module 
 - [ ] Gemini Conversational AI Module
+- [ ] OpenAI Conversational AI Module 
 
 Logging 
 - [ ] Add logger (low priority as of now)

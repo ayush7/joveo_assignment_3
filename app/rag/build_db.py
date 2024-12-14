@@ -13,7 +13,7 @@ from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain_community.llms import Ollama
 from langchain.prompts import PromptTemplate  # Added this import
-
+import params
 
 
 
@@ -29,7 +29,7 @@ class LangChainWebsiteStore:
                                                     chunk_overlap=chunkoverlap,
                                                     length_function=len
                                                 )
-        self.embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
+        self.embeddings = HuggingFaceEmbeddings(model_name=params.EMBEDDING_MODEL)
         self.single_document = []
         self.documents = []
         self.db_location = db_location
@@ -61,5 +61,4 @@ class LangChainWebsiteStore:
         splits = self.generate_splits(mdfile_doc)
         vectorstore = self.store_document(splits)
         return vectorstore 
-        
         

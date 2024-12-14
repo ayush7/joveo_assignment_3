@@ -6,7 +6,7 @@ import uuid
 from pathlib import Path
 import json
 
-def update_scraped_database(link,scraped_filepath,database_file):
+def update_scraped_database(link,page_title,scraped_filepath,database_file):
     """Updated databse"""
     
 
@@ -21,7 +21,8 @@ def update_scraped_database(link,scraped_filepath,database_file):
 
     entry = {
         "link":link,
-        "filepath":scraped_filepath
+        "filepath":scraped_filepath,
+        "page_title":page_title
     }
     
     # Add the new link entry
@@ -33,7 +34,7 @@ def update_scraped_database(link,scraped_filepath,database_file):
     return database_file
 
 
-def save_markdown(url, markdown_content, directory = ".cache/scraped_data", database_file_name='scraped_pages_db.json'):
+def save_markdown(url, markdown_content, page_title = "NaN" ,directory = ".cache/scraped_data", database_file_name='scraped_pages_db.json'):
     """
     Return scraped db path along with save path of the file
     """
@@ -48,6 +49,6 @@ def save_markdown(url, markdown_content, directory = ".cache/scraped_data", data
     with open(save_path,'w', encoding='utf-8') as f:
         f.write(str(markdown_content))
     
-    update_scraped_database(link=url, scraped_filepath=save_path, database_file=scraped_db_file_path)
+    update_scraped_database(link=url, page_title=page_title ,scraped_filepath=save_path, database_file=scraped_db_file_path)
     
     return scraped_db_file_path, save_path

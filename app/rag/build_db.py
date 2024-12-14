@@ -1,3 +1,9 @@
+"""
+Module Used for creating Vector Store.
+Seperate module for retrival. 
+"""
+
+
 import os
 from langchain_community.document_loaders import PyPDFLoader, UnstructuredMarkdownLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -9,16 +15,14 @@ from langchain_community.llms import Ollama
 from langchain.prompts import PromptTemplate  # Added this import
 
 
-from dotenv import load_dotenv
-
-
-
-## Load environment variables (for OpenAI API key)
-load_dotenv()
-
 
 
 class LangChainWebsiteStore:
+    """
+    Creates a vector store for all the scraped data from websites. Testing a bit more. Collection format can be improved maybe. 
+    """
+    
+    
     def __init__(self, chunksize=3000, chunkoverlap=300, db_location = "./chroma_db", collection_name = "default") -> None:
         self.text_splitter = RecursiveCharacterTextSplitter(
                                                     chunk_size=chunksize,

@@ -1,3 +1,7 @@
+"""
+Main crawler used for crawling pages and getting all the needed links. 
+"""
+
 import scrapy
 from scrapy.crawler import CrawlerProcess
 from scrapy.linkextractors import LinkExtractor
@@ -5,8 +9,12 @@ from scrapy.spiders import CrawlSpider, Rule
 from multiprocessing import Process, Queue 
 from urllib.parse import urlparse
 import tldextract
+import os 
+from pathlib import Path
 
 class LinkExtractorSpider(CrawlSpider):
+    """Simple Spider to crawl a website to a given depth"""
+    
     name = "link_extractor_spider"
 
     def __init__(self, start_url, allowed_domains, max_depth, *args, **kwargs):
@@ -35,9 +43,8 @@ class LinkExtractorSpider(CrawlSpider):
             return
         return super()._requests_to_follow(response)
 
-# Wrapper function to make the module reusable
 def run_links_extractor(start_url, allowed_domains, max_depth=1, output_file_name="links_output.json"):
-    
+    """Sets up the crawler to save outputs to a file. This can be later saved into a database"""
     process = CrawlerProcess(settings={
         "FEEDS": {
             output_file_name: {"format": "json"},
@@ -47,20 +54,30 @@ def run_links_extractor(start_url, allowed_domains, max_depth=1, output_file_nam
     process.crawl(LinkExtractorSpider, start_url=start_url, allowed_domains=allowed_domains, max_depth=max_depth)
     process.start()
 
-def crawl_process(start_url, allowed_domains, max_depth=1, output_file_name="links_output.json"):
-    p1 = Process(target=run_scraper, args=(start_url, allowed_domains, max_depth, output_file_name))
+
+
+def crawl_threaded_process(start_url, allowed_domains, max_depth=1, output_file_name="links_output.json"):
+    """
+    Was created to enable multithreading to allow multiple uses but some errors accoring as of now. 
+    Just gonna park it for now
+    """
+    
+    p1 = Process(target=run_links_extractor, args=(start_url, allowed_domains, max_depth, output_file_name))
     p1.start()
     p1.join()
     return output_file_name
 
-def run_crawl_process(start_url, allowed_domains=[], max_depth=2):
+def run_crawl_process(start_url, allowed_domains=[], max_depth=2, save_directory=".cache/links_cache"):
+    """
+    Single Call Crawler. Sadly can't be reused unless called from main with a new thread
+    """
+    Path(save_directory).mkdir(parents=True, exist_ok=True)
+    
     primary_domain = tldextract.extract(start_url).registered_domain
     allowed_domains.append(primary_domain)
-    output_file_name = f"{primary_domain}.json"
+    output_file_name = os.path.join(save_directory,f"{primary_domain}.json")
     run_links_extractor(start_url, allowed_domains, max_depth, output_file_name)
-    # p1 = Process(target=run_scraper, args=(start_url, allowed_domains, max_depth, output_file_name))
-    # p1.start()
-    # p1.join()
+
     
     print(f"Crawled {start_url}, URLs saved to  {output_file_name}")
     

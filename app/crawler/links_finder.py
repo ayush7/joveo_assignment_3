@@ -76,6 +76,11 @@ def run_crawl_process(start_url, allowed_domains=[], max_depth=2, save_directory
     primary_domain = tldextract.extract(start_url).registered_domain
     allowed_domains.append(primary_domain)
     output_file_name = os.path.join(save_directory,f"{primary_domain}.json")
+    
+    with open(output_file_name, 'w') as ff:
+        ff.write('')
+    
+    
     run_links_extractor(start_url, allowed_domains, max_depth, output_file_name)
 
     

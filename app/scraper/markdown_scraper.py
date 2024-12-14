@@ -29,16 +29,18 @@ async def markdown_scrape(url):
             # simulate_user=True,        # Enables human-like behavior
             # override_navigator=True 
         )
-    print(result)
-    return result.markdown
+    scrape_success = result.success
+    print(result.success)
+    # print(type(result))
+    return result.markdown, scrape_success
 
 
 
 # Testing Modules
 async def runf():
-    r = await markdown_scrape("https://www.firecrawl.dev/")
-    print(r)
-    return r
+    r, scrape_success = await markdown_scrape("https://www.firecrawl.dev/")
+    # print(r)
+    return r, scrape_success
     
 if __name__=='__main__':
     r = asyncio.run( runf())

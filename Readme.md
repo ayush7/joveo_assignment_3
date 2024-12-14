@@ -14,9 +14,9 @@ Crawler
 - [ ] Link Filter Agent
 
 Scraper
-- [x] Write scraper (Tested)
-- [x] Scraper database ()
-- [ ] Remove Links from scraped markdown
+- [x] Write scraper :white_check_mark:
+- [x] Scraper database :white_check_mark:
+- [x] Remove Links from scraped markdown :white_check_mark:
 
 RAG Module
 - [x] Database Creator Module
@@ -27,6 +27,9 @@ RAG Module
 Agents Module
 - [ ] Context Compression Agent
 - [ ] RAG Agent
-- [x] Gemini Single Query Module
-- [ ] OpenAI Single Query Module
+- [x] Gemini Single Query Module (not tested)
+- [ ] OpenAI Single Query Module 
 - [ ] Gemini Conversational AI Module
+
+Logging 
+- [ ] Add logger (low priority as of now)

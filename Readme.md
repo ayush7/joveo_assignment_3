@@ -20,7 +20,7 @@ Scraper
 - [x] Remove Links from scraped markdown :white_check_mark:
 
 RAG Module
-- [x] Database Creator Module
+- [x] Database Creator Module :white_check_mark:
 - [x] Retrival Module (Testing)
 - [x] Rerank Module/2 step retriver (Testing)
 - [ ] Advanced Multi prompt retriver :thumbsdown:

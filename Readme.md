@@ -2,7 +2,21 @@
 
 ## Instructions to Run 
 
+### Setup the environment
 
+```
+git clone https://github.com/ayush7/joveo_assignment_3
+cd joveo_assignment_3
+python3 -m venv .ragenv
+source .ragenv/bin/activate
+pip install -r requirements.txt
+```
+
+### Run the app
+```
+cd app
+python run.py
+``` 
 
 ## Progress <br>
 

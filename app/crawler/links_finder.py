@@ -69,8 +69,8 @@ def run_crawl_process(start_url, allowed_domains=[], max_depth=2):
     
 
 
-if __name__=="__main__":
-    run_crawl_process(start_url="https://www.joveo.com/")
-    print(f"Completed Joveo, switching to gihub")
-    run_crawl_process("https://www.github.com/")
-    print("Completed github")
+# if __name__=="__main__":
+#     run_crawl_process(start_url="https://www.joveo.com/")
+#     print(f"Completed Joveo, switching to gihub")
+#     run_crawl_process("https://www.github.com/")
+#     print("Completed github")

@@ -33,5 +33,9 @@ Agents Module
 - [ ] Gemini Conversational AI Module
 - [ ] OpenAI Conversational AI Module 
 
+GUI
+- [ ] Create basic Streamlit app
+- [ ] Upgrade app with options
+
 Logging 
 - [ ] Add logger (low priority as of now)

@@ -19,3 +19,5 @@ SIMPLE_TEST_QUERY = "What is the primary purpose of the website?"
 
 OPENAI_MODEL = "gpt-4o-mini"
 GEMINI_MODEL = "gemini-1.5-flash"
+
+DEFAULT_WEBSITE = "https://crawl4ai.com/"

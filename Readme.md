@@ -73,7 +73,7 @@ Agents Module
 - [x] OpenAI Conversational AI Module 
 
 GUI
-- [ ] Create basic Streamlit/gradio app
+- [ ] Create basic Streamlit/gradio app [in progress]
 - [ ] Upgrade app with options
 
 Logging 

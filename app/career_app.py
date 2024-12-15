@@ -8,6 +8,7 @@ from crawler import links_finder, links_util
 from scraper import scrape_and_save
 from rag import build_db, retriver
 from rag.retriver import AdvanceRetriever, SimpleLangChainRetriever
+from agents import call_agent
 
 import params 
 import os 
@@ -133,6 +134,12 @@ async def run_career_app(url, delete_old_cache = True, delete_persistent_db = Fa
     return 
 
 
+
+async def retrival_chatbot_looper():
+    return 
+
+
+
 async def retrival_chatbot_main():
     """Runs the chatbot"""
     
@@ -140,10 +147,13 @@ async def retrival_chatbot_main():
     
     # Advance Retriver
     adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR)
-    reesults = adv_retr_obj.two_step_retrieval(query=initial_query)
+    results = adv_retr_obj.two_step_retrieval(query=initial_query)
     
+    opeai_obj = call_agent.OpenAICaller()
+    reply, conversation_history = opeai_obj.multi_turn_chat(context=results, agent="rag_chatbot", turn_prompt=initial_query)
     
-    
+    print(reply)
+    print(reply.content)
     
     return
 

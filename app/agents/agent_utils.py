@@ -18,6 +18,6 @@ def agent_prompts(agent):
         context_replace_keyword= websiteagent.website_query_agent["context_replace_keyword"]
         
     
-    
+    print(sys, usr, context_replace_keyword)
     
     return sys, usr, context_replace_keyword

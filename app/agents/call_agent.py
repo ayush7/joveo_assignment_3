@@ -29,7 +29,7 @@ class OpenAICaller:
         
     
 
-    def single_call(self, context, agent):
+    def single_call(self, context, agent="rag_chatbot"):
         system_prompt, user_prompt, replace_keyword = agent_prompts(agent=agent)
         system_prompt = system_prompt.replace(replace_keyword, str(context))
         
@@ -37,7 +37,7 @@ class OpenAICaller:
         
         messages = [{"role":"system", "content":system_prompt},
                     {"role":"user", "content":user_prompt}]
-        response = self.client.Completion.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             prompt=system_prompt + user_prompt,
             temperature=self.temperature
@@ -64,13 +64,14 @@ class OpenAICaller:
             conversation_history.append({"role":"user", "content":turn_prompt})
             
 
-        response = self.client.ChatCompletion.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             messages=conversation_history,
             temperature=self.temperature
         )
         
-        reply = response.choices[0].message['content'].strip()
+        
+        reply = response.choices[0].message.content
         conversation_history.append({"role": "assistant", "content": reply})
         
         return reply, conversation_history

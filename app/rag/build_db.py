@@ -57,8 +57,13 @@ class LangChainWebsiteStore:
     def ingest_markdown(self, markdown_file_path, metadata = None, collection_name = "default"):
         self.collection_name = collection_name
         self.metadata = metadata
-        mdfile_doc = self.load_document(markdown_path=markdown_file_path)
-        splits = self.generate_splits(mdfile_doc)
-        vectorstore = self.store_document(splits)
-        return vectorstore 
+        try:
+            mdfile_doc = self.load_document(markdown_path=markdown_file_path)
+            splits = self.generate_splits(mdfile_doc)
+            vectorstore = self.store_document(splits)
+            return vectorstore 
+        except Exception as e:
+            print(f"Exception in {markdown_file_path}")
+            return None
+        
         

@@ -22,9 +22,9 @@ class LinkExtractorSpider(CrawlSpider):
         self.start_urls = [start_url]
         self.allowed_domains = allowed_domains
         self.max_depth = int(max_depth)
-        self.link_extractor = LinkExtractor(allow_domains=self.allowed_domains)
+        self.link_extractor = LinkExtractor(allow_domains=self.allowed_domains, deny=('.zip','.pdf','.docx'))
         self.rules = [
-            Rule(self.link_extractor, callback='parse_links', follow=True)
+            Rule(self.link_extractor, callback='parse_links', follow=True),
         ]
         self._compile_rules()
 
@@ -45,14 +45,19 @@ class LinkExtractorSpider(CrawlSpider):
 
 def run_links_extractor(start_url, allowed_domains, max_depth=1, output_file_name="links_output.json"):
     """Sets up the crawler to save outputs to a file. This can be later saved into a database"""
-    process = CrawlerProcess(settings={
-        "FEEDS": {
-            output_file_name: {"format": "json"},
-        },
-        "LOG_LEVEL": "INFO",
-    })
-    process.crawl(LinkExtractorSpider, start_url=start_url, allowed_domains=allowed_domains, max_depth=max_depth)
-    process.start()
+    
+    try:
+    
+        process = CrawlerProcess(settings={
+            "FEEDS": {
+                output_file_name: {"format": "json"},
+            },
+            "LOG_LEVEL": "INFO",
+        })
+        process.crawl(LinkExtractorSpider, start_url=start_url, allowed_domains=allowed_domains, max_depth=max_depth)
+        process.start()
+    except Exception as e:
+        print(f"Exception in crawling URL {start_url}")
 
 
 
@@ -80,7 +85,7 @@ def run_crawl_process(start_url, allowed_domains=[], max_depth=2, save_directory
     with open(output_file_name, 'w') as ff:
         ff.write('')
     
-    
+    # Scrapy links extractor 
     run_links_extractor(start_url, allowed_domains, max_depth, output_file_name)
 
     
@@ -89,10 +94,3 @@ def run_crawl_process(start_url, allowed_domains=[], max_depth=2, save_directory
     return output_file_name
     
     
-
-
-# if __name__=="__main__":
-#     run_crawl_process(start_url="https://www.joveo.com/")
-#     print(f"Completed Joveo, switching to gihub")
-#     run_crawl_process("https://www.github.com/")
-#     print("Completed github")

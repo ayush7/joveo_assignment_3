@@ -30,20 +30,21 @@ class OpenAICaller:
     
 
     def single_call(self, context, agent="rag_chatbot"):
-        system_prompt, user_prompt, replace_keyword = agent_prompts(agent=agent)
+        system_prompt, user_prompt, replace_keyword, structured_output_format = agent_prompts(agent=agent)
         system_prompt = system_prompt.replace(replace_keyword, str(context))
         
         
         
         messages = [{"role":"system", "content":system_prompt},
                     {"role":"user", "content":user_prompt}]
-        response = self.client.chat.completions.create(
+        response = self.client.beta.chat.completions.parse(
             model=self.model,
-            prompt=system_prompt + user_prompt,
-            temperature=self.temperature
+            messages=messages,
+            temperature=self.temperature,
+            response_format=structured_output_format
         )
         
-        return response.choices[0].text.strip()
+        return response.choices[0].message.content
     
     def handle_messages_for_long_chat(self, conversation_history):
         return
@@ -82,15 +83,6 @@ class OpenAICaller:
 
 
 
-
-
-
-
-def get_openai_response(context, agent:str, model='gpt-4o-mini'):
-    
-    return
-
-
 def get_gemini_response(context, agent:str, model = "gemini-1.5-flash"):
 
     system_prompt, user_prompt , replace_keyword = agent_prompts(agent=agent)    
@@ -106,10 +98,3 @@ def get_gemini_response(context, agent:str, model = "gemini-1.5-flash"):
     return response
 
 
-def run_gemini_chatbot():
-    return
-
-
-
-def run_openai_chatbot():
-    return

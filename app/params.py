@@ -4,7 +4,7 @@ Will use it later once I clean a bit of the code
 """
 
 
-MAX_DEPTH = 1                                                    # Depth to crawl 
+MAX_DEPTH = 2                                                    # Depth to crawl 
 
 CACHE_DIR = ".cache/"                                            # Cache base directory 
 LINKS_CACHE_DIR = ".cache/links_cache"                           # Crawled links cache dir
@@ -20,4 +20,4 @@ SIMPLE_TEST_QUERY = "What is the primary purpose of the website?"
 OPENAI_MODEL = "gpt-4o-mini"
 GEMINI_MODEL = "gemini-1.5-flash"
 
-DEFAULT_WEBSITE = "https://crawl4ai.com/"
+DEFAULT_WEBSITE = "https://www.anthropic.com/"

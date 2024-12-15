@@ -30,20 +30,20 @@ async def markdown_scrape(url):
             # override_navigator=True 
         )
     scrape_success = result.success
-    print(result.success)
+    # print(result.success)
     # print(type(result))
     return result.markdown, scrape_success
 
 
 
-# Testing Modules
-async def runf():
-    r, scrape_success = await markdown_scrape("https://www.firecrawl.dev/")
-    # print(r)
-    return r, scrape_success
+# # Testing Modules
+# async def runf():
+#     r, scrape_success = await markdown_scrape("https://www.firecrawl.dev/")
+#     # print(r)
+#     return r, scrape_success
     
-if __name__=='__main__':
-    r = asyncio.run( runf())
+# if __name__=='__main__':
+#     r = asyncio.run( runf())
 # async def test()
 # url = "https://www.joveo.com"
 # loop = asyncio.get_event_loop()

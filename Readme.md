@@ -51,7 +51,7 @@ Probably won't be able to finish :thumbsdown:
 Crawler
 - [x] Write Crawler :white_check_mark:
 - [x] Crawler Link Parser :white_check_mark:
-- [ ] Link Filter Agent
+- [x] Link classification Agent :white_check_mark:
 
 Scraper
 - [x] Write scraper :white_check_mark:
@@ -80,4 +80,4 @@ Logging
 - [ ] Add logger (low priority as of now) :thumbsdown:
 
 Error Handlers
-- [ ] Add error handling for each module :thumbsdown:
+- [x] Add error handling for each module :white_check_mark:

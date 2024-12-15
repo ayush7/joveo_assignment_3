@@ -66,11 +66,11 @@ RAG Module
 
 Agents Module
 - [ ] Context Compression Agent :thumbsdown:
-- [x] RAG Agent
+- [x] RAG Agent :white_check_mark:
 - [x] Gemini Single Query Module (not tested)
-- [x] OpenAI Single Query Module 
+- [x] OpenAI Single Query Module :white_check_mark:
 - [ ] Gemini Conversational AI Module 
-- [x] OpenAI Conversational AI Module 
+- [x] OpenAI Conversational AI Module :white_check_mark:
 
 GUI
 - [ ] Create basic Streamlit/gradio app [in progress]

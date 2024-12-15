@@ -6,7 +6,9 @@ run.py is just the entrypoint
 
 from crawler import links_finder, links_util
 from scraper import scrape_and_save
-from rag import build_db
+from rag import build_db, retriver
+from rag.retriver import AdvanceRetriever, SimpleLangChainRetriever
+
 import params 
 import os 
 import shutil
@@ -111,7 +113,7 @@ async def run_career_app(url, delete_old_cache = True, delete_persistent_db = Fa
 
     
     # Run the scraper to scrape pages 
-    scrape_status_list, saved_scraped_db = await scrape_pages_func(list_of_links[:5], link_titles[:5])
+    scrape_status_list, saved_scraped_db = await scrape_pages_func(list_of_links[:20], link_titles[:20])
     
     
     
@@ -122,6 +124,7 @@ async def run_career_app(url, delete_old_cache = True, delete_persistent_db = Fa
     
     if create_vector_db:
         rag_pages_for_vectordb(scrape_status_list=scrape_status_list, saved_scraped_db=saved_scraped_db, collection_name="default_collection")
+        
     
     
     
@@ -130,8 +133,18 @@ async def run_career_app(url, delete_old_cache = True, delete_persistent_db = Fa
     return 
 
 
-def retrival_chatbot_main():
+async def retrival_chatbot_main():
     """Runs the chatbot"""
+    
+    initial_query = "Tell me about the website and what are the different sections in the website."
+    
+    # Advance Retriver
+    adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR)
+    reesults = adv_retr_obj.two_step_retrieval(query=initial_query)
+    
+    
+    
+    
     return
 
 

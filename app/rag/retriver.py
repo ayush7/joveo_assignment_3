@@ -49,20 +49,28 @@ class AdvanceRetriever:
     def two_step_retrieval(self, query):
         # Initial retrieval
         initial_results = self.db.similarity_search(query, 
-                                         k=50, 
-                                         
+                                         k=params.RETRIVAL_SIMILARITY_SEARCH_RESULTS, 
+                                         filter=None   # Add filter dictionary here if you want to filter from metadata
                                          )
-        print(f"Initial Results: \n\n {initial_results}")
         
+        # print(initial_results[0])
+        sources_dict = {'1':'234'} #Placeholder for testing rn 
+        # for item in initial_results:
+        #     sources_dict[f'{item["sources"]}'] = item["content-link"]
+            
+        # print(f"Initial Results: \n\n {initial_results}")
+        print(initial_results)
         # Refine results
         print("Refining results")
         refined_results = self.refine_results(initial_results, query)
-        return refined_results
+        return refined_results, sources_dict
 
     def refine_results(self, results, query):
     # Cross encoder based scoring -> Get top 10 results maybe
-    
-        model_inputs = [[query, result.page_content] for result in results]
+        print("Starting Reranking")
+        model_inputs = [(query, result.page_content) for result in results]
+        
+        # print(model_inputs)
         scores = self.model.predict(model_inputs)
 
         # Sort scores in decreasing order (not ascending reverse=True always)
@@ -71,10 +79,13 @@ class AdvanceRetriever:
 
         print("Query:", query)
 
-        for hit in results[0:5]:
-            print("Score: {:.5f}".format(hit["score"]))
+        # scores = set()
+        # for hit in results:
+        #     scores.add(hit["score"])
+        # print(scores)
+        # print(results[0:1])
         
-        return results[:10]
+        return results[:params.RETRIVAL_CROSS_ENCODER_RESULTS]
 
 class QueryHandler:
     def __init__(self, database_path):

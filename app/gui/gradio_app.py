@@ -107,13 +107,14 @@
 
 #     return demo
 
-        
+
 import gradio as gr 
 from agents import call_agent
 from rag.retriver import AdvanceRetriever
 import params 
 import asyncio
 from career_app import run_career_app
+
 
 class WebsiteChatBotRag:
     def __init__(self):
@@ -125,23 +126,27 @@ class WebsiteChatBotRag:
 
 
     async def process_website(self, website_url):
-        """Process the website for retrieval"""
+        """Process the website for retrieval - Scrapes and stores website"""
         try:
             
             
-            # Advance Retriever
-            adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR)
+            await run_career_app(url=website_url, 
+                           delete_old_cache=False,
+                           delete_persistent_db=False,
+                           create_vector_db=True)
+            # # Advance Retriever
+            # adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR)
             
-            # Store the current website for reference
-            self.current_website = website_url
+            # # Store the current website for reference
+            # self.current_website = website_url
             
-            # Perform initial retrieval about the website
-            initial_query = f"Tell me about the website {website_url} and what are the different sections in the website."
-            results = adv_retr_obj.two_step_retrieval(query=initial_query)
+            # # Perform initial retrieval about the website
+            # initial_query = f"Tell me about the website {website_url} and what are the different sections in the website."
+            # results = adv_retr_obj.two_step_retrieval(query=initial_query)
             
-            # Convert results to list of strings
-            r = [str(item["input"]) for item in results]
-            self.retrieval_results = r
+            # # Convert results to list of strings
+            # r = [str(item["input"]) for item in results]
+            # self.retrieval_results = r
             
             return f"Website {website_url} processed successfully!"
         except Exception as e:
@@ -228,72 +233,105 @@ def create_interface():
     # Initialize the chatbot
     chatbot = WebsiteChatBotRag()
     
-    # Create Gradio interface
     with gr.Blocks() as demo:
         gr.Markdown("# Website RAG Chatbot")
         
         with gr.Row():
             # Left column for website input and controls
             with gr.Column(scale=1):
-                # Website URL input
-                url_input = gr.Textbox(label="Enter Website URL")
+                url_input = gr.Textbox(
+                    label="Enter Website URL",
+                    placeholder="https://example.com"
+                )
                 
-                # Process website button
-                process_btn = gr.Button("Process Website")
+                with gr.Row():
+                    process_btn = gr.Button("Process Website", variant="primary")
+                    clear_btn = gr.Button("Clear Context", variant="secondary")
                 
-                # Clear context button
-                clear_btn = gr.Button("Clear Conversation Context")
-                
-                # Status message
-                status_output = gr.Textbox(label="Status", interactive=False)
+                status_output = gr.Textbox(
+                    label="Status",
+                    interactive=False,
+                    show_copy_button=True
+                )
             
             # Right column for chat interface
             with gr.Column(scale=2):
-                # Chatbot interface
-                async def chat_handler(message, history):
-                    # Convert history to the format expected by the chatbot
-                    response, updated_history, _ = await chatbot.gradio_chatbot_interface(
-                        message, 
-                        conversation_history=history
-                    )
-                    return response
-                
-                chatbot_interface = gr.ChatInterface(
-                    chat_handler, 
-                    title="Context-Aware Website Chat"
+                chatbox = gr.Chatbot(
+                    label="Chat History",
+                    height=500,
+                    show_copy_button=True
                 )
+                
+                with gr.Row():
+                    msg_input = gr.Textbox(
+                        label="Message",
+                        placeholder="Type your message here...",
+                        scale=9
+                    )
+                    submit_btn = gr.Button("Send", variant="primary", scale=1)
                 
                 # Sources section
                 with gr.Accordion("Sources", open=False):
-                    sources_output = gr.Textbox(label="Relevant Sources", lines=3)
+                    sources_output = gr.Textbox(
+                        label="Relevant Sources",
+                        interactive=False,
+                        lines=3,
+                        show_copy_button=True
+                    )
+
+        # Chat handler function
+        async def chat_handler(message, history):
+            response, updated_history, _ = await chatbot.gradio_chatbot_interface(
+                message,
+                conversation_history=history
+            )
+            return response
+
+        # Handle message submission
+        submit_btn.click(
+            fn=chat_handler,
+            inputs=[msg_input, chatbox],
+            outputs=[chatbox],
+            api_name="chat"
+        ).then(
+            fn=lambda: None,  # Clear input after sending
+            outputs=[msg_input]
+        )
+
+        # Also trigger on Enter key
+        msg_input.submit(
+            fn=chat_handler,
+            inputs=[msg_input, chatbox],
+            outputs=[chatbox],
+        ).then(
+            fn=lambda: None,  # Clear input after sending
+            outputs=[msg_input]
+        )
         
-        # Wire up the interactions
+        # Process website button handler
         process_btn.click(
-            chatbot.process_website, 
-            inputs=[url_input], 
+            fn=chatbot.process_website,
+            inputs=[url_input],
             outputs=[status_output]
         )
         
-        # Clear context button
+        # Clear context button handler
         clear_btn.click(
-            chatbot.clear_conversation_history,
-            outputs=[status_output]
+            fn=chatbot.clear_conversation_history,
+            outputs=[status_output, chatbox, sources_output]
         )
         
         # Update sources after each chat interaction
-        chatbot_interface.chatbot.then(
-            lambda x: chatbot.retrieval_results if chatbot.retrieval_results else [], 
-            inputs=[chatbot_interface.chatbot], 
+        def update_sources(message, chat_history):
+            return chatbot.retrieval_results if chatbot.retrieval_results else ""
+        
+        submit_btn.click(
+            fn=update_sources,
+            inputs=[msg_input, chatbox],
             outputs=[sources_output]
         )
-        
-        def update_sources():
-            return chatbot.get_sources()
-        
-
 
     return demo
-
 # Launch the interface
 if __name__ == "__main__":
     interface = create_interface()

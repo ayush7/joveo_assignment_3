@@ -21,3 +21,8 @@ OPENAI_MODEL = "gpt-4o-mini"
 GEMINI_MODEL = "gemini-1.5-flash"
 
 DEFAULT_WEBSITE = "https://www.anthropic.com/"
+
+
+# RAG
+RETRIVAL_SIMILARITY_SEARCH_RESULTS = 50
+RETRIVAL_CROSS_ENCODER_RESULTS = 5

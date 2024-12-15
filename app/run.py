@@ -27,9 +27,9 @@ if __name__=="__main__":
     
     
     # # Run Simple Retrival
-    asyncio.run(career_app.retrival_chatbot_main())
+    # asyncio.run(career_app.retrival_chatbot_main())
     
     
     # # Run the GUI
-    # interface = gradio_app.create_interface()
-    # asyncio.run(interface.launch())
+    interface = gradio_app.create_interface()
+    asyncio.run(interface.launch())

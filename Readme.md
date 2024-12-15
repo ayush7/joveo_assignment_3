@@ -4,8 +4,10 @@
 
 - The scraping may not work for every website as I used crawl4ai which is open source but has limits when it comes to websites with good robot protection
 - The database creation takes some time as crawling, scraping and vectorization all happens at the same time
-- Added latency in retrival due to cross encoder reranking - adding parellel processing can fix it significantly 
+- Added latency in retrival due to cross encoder reranking - adding parellel processing can fix it significantly.
 - Context limiter has not been added so there can be some errors for larger websites. I have tried to limit it with rudimentary methods but it may still cause issues sometimes. 
+
+
 
 
 
@@ -51,7 +53,7 @@ Probably won't be able to finish :thumbsdown:
 Crawler
 - [x] Write Crawler :white_check_mark:
 - [x] Crawler Link Parser :white_check_mark:
-- [x] Link classification Agent :white_check_mark:
+
 
 Scraper
 - [x] Write scraper :white_check_mark:
@@ -71,6 +73,10 @@ Agents Module
 - [x] OpenAI Single Query Module :white_check_mark:
 - [ ] Gemini Conversational AI Module 
 - [x] OpenAI Conversational AI Module :white_check_mark:
+
+Special Agents
+- [x] Link classification Agent :white_check_mark:
+- [ ] Query Classifier Agent 
 
 GUI
 - [ ] Create basic Streamlit/gradio app [in progress]

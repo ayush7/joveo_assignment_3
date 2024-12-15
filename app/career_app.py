@@ -193,17 +193,15 @@ async def retrival_chatbot_looper():
 async def retrival_chatbot_main():
     """Runs the chatbot"""
     
-    initial_query = "Tell me about the website and what are the different sections in the website."
+    initial_query = "What are the open roles available within the company"
     
     # Advance Retriver
-    adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR)
+    adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR, collection_name="anthropic.com")
     results = adv_retr_obj.two_step_retrieval(query=initial_query)
     
     opeai_obj = call_agent.OpenAICaller()
     reply, conversation_history = opeai_obj.multi_turn_chat(context=results, agent="rag_chatbot", turn_prompt=initial_query)
-    
     print(reply)
-    print(reply.content)
     
     return 
 

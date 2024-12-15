@@ -44,13 +44,13 @@ class LangChainWebsiteStore:
         splits = self.text_splitter.split_documents(documents)
         return splits
 
-    def store_document(self, splits):
+    def store_document(self, splits, metadata):
         vectorstore = Chroma.from_documents(
                     documents=splits,
                     embedding=self.embeddings,
                     persist_directory=self.db_location, 
                     collection_name= self.collection_name,
-                    collection_metadata = self.metadata
+                    collection_metadata = metadata
                 )
         return vectorstore
     
@@ -60,7 +60,7 @@ class LangChainWebsiteStore:
         try:
             mdfile_doc = self.load_document(markdown_path=markdown_file_path)
             splits = self.generate_splits(mdfile_doc)
-            vectorstore = self.store_document(splits)
+            vectorstore = self.store_document(splits, metadata=metadata)
             return vectorstore 
         except Exception as e:
             print(f"Exception in {markdown_file_path}")

@@ -3,9 +3,20 @@
 ## Notes
 
 - The scraping may not work for every website as I used crawl4ai which is open source but has limits when it comes to websites with good robot protection
-- The database creation takes some time as crawling, scraping and vectorization all happens at the same time
-- Added latency in retrival due to cross encoder reranking - adding parellel processing can fix it significantly.
+- The database creation takes some time as crawling, scraping and vectorization all happens at the same time - Be patient, can take upto 20-30 minutes even for 400 links
 - Context limiter has not been added so there can be some errors for larger websites. I have tried to limit it with rudimentary methods but it may still cause issues sometimes. 
+
+## Optimizations 
+-  Added metadata fields for easy filteration during retrival. Query classification agent was having adding additional time so removes it.
+-  Reranking - once retrivals are done contextual similarity between documents are found using a Cross Encoder and scored. Better encoders  can be tried to improve accuracy. 
+- Every page is converted to Markdown for ease of passing to LLMs. Links are removed from all page contents to ensure better contextual understanding
+
+
+## Optimizations I could not do yet:
+- Prompt Classification
+- Multi Prompt retriver - To ensure variations of each prompt is passed in order to query the database. All the results are combined and then reranked. 
+- Optimization with summarizations - For reducing time. Instead of full text, a summary of the text with only the basic version is used for retrival. Then the full text retrived from matches. Increase information density and gives better results. 
+- Multi algo serach -> search with different strategies but combine scores to get best matches 
 
 
 
@@ -45,6 +56,11 @@ cd app
 python run.py
 ``` 
 
+### params.py
+Edit the values in params.py for changing things like depth of retrival. <br>
+Note: The deeper the crawl the higher the chances of breaking in intermediory LLM calls - which have not been optimized. 
+
+
 ## Progress <br>
 
 Tested Module - :white_check_mark:
@@ -79,8 +95,8 @@ Special Agents
 - [ ] Query Classifier Agent 
 
 GUI
-- [ ] Create basic Streamlit/gradio app [in progress]
-- [ ] Upgrade app with options
+- [x] Create basic Streamlit/gradio app :white_check_mark:
+- [x] Upgrade app with options :white_check_mark:
 
 Logging 
 - [ ] Add logger (low priority as of now) :thumbsdown:

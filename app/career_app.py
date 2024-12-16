@@ -95,10 +95,10 @@ def rag_pages_for_vectordb(scrape_status_list, saved_scraped_db, collection_name
     
     for scrape_list_item in tqdm(scraped_db["scraped_data"]):
         metadata = {}
-        metadata["content-link"] = scrape_list_item["link"]
+        metadata["content_link"] = scrape_list_item["link"]
         
         metadata["category"] =  collection_name #scrape_list_item["category"]                                   # Variable for later once done with category agent
-        metadata["page-title"] = scrape_list_item["page_title"]         
+        metadata["page_title"] = scrape_list_item["page_title"]         
         try:
             vectorstore = rag_obj.ingest_markdown(markdown_file_path=scrape_list_item["filepath"],
                                 metadata=metadata,
@@ -198,13 +198,13 @@ async def retrival_chatbot_looper():
 
 
 async def retrival_chatbot_main():
-    """Runs the chatbot"""
+    """Runs the chatbot - mostly used for testing"""
     
     initial_query = "What are the open roles available within the company"
     
     # Advance Retriver
     adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR, collection_name="anthropic.com")
-    results = adv_retr_obj.two_step_retrieval(query=initial_query)
+    results, sources_list = adv_retr_obj.two_step_retrieval(query=initial_query)
     
     opeai_obj = call_agent.OpenAICaller()
     reply, conversation_history = opeai_obj.multi_turn_chat(context=results, agent="rag_chatbot", turn_prompt=initial_query)

@@ -55,17 +55,20 @@ class AdvanceRetriever:
         
         print("Initial Results: ",len(initial_results))
         sources_dict = {'1':'234'} #Placeholder for testing rn 
-        # for item in initial_results:
-        #     sources_dict[f'{item["sources"]}'] = item["content-link"]
-            
+        sources_list = []
+        print("xcheck1")
+        for item in initial_results:
+            sources_list.append(item.page_content)
+        
+        print("xcheck2")
         # print(f"Initial Results: \n\n {initial_results}")
-        print(initial_results)
+        # print(initial_results)
         # Refine results
         print("Refining results")
         refined_results = await self.refine_results(results=initial_results, query=query)
         
         print("Returning RAG Results" )
-        return refined_results, sources_dict
+        return refined_results, sources_list
 
     async def refine_results(self, results, query):
     # Cross encoder based scoring -> Get top 10 results maybe

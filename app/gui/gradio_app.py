@@ -123,6 +123,7 @@ class WebsiteChatBotRag:
         self.retrieval_results = None
         self.current_website = None
         self.current_collection = None
+        self.sources_list = None
         
         
 
@@ -151,7 +152,7 @@ class WebsiteChatBotRag:
             # context = self.retrieval_results or ""
             
             adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR, collection_name=self.current_collection)
-            refined_results, sources_dict = await adv_retr_obj.two_step_retrieval(query=user_query)
+            refined_results, self.sources_list = await adv_retr_obj.two_step_retrieval(query=user_query)
             print(len(refined_results))
             # print(refined_results[0]["input"])
             
@@ -178,10 +179,10 @@ class WebsiteChatBotRag:
             # Update conversation history
             self.conversation_history = updated_conversation_history
             
-            return reply, updated_conversation_history, self.retrieval_results
+            return reply, updated_conversation_history, self.retrieval_results, self.sources_list 
         
         except Exception as e:
-            return f"Error in chat: {str(e)}", [], None
+            return f"[x2] Error in chat: {str(e)}", [], None, self.sources_list 
 
     async def retrival_chatbot_without_retrival(self, user_query, conversational_history=None):
         """Runs the chatbot without retrieval"""
@@ -202,7 +203,7 @@ class WebsiteChatBotRag:
             # Update conversation history
             self.conversation_history = updated_conversation_history
             
-            return reply, updated_conversation_history, None
+            return reply, updated_conversation_history, None, self.sources_list
         
         except Exception as e:
             return f"Error in chat: {str(e)}", [], None
@@ -218,7 +219,7 @@ class WebsiteChatBotRag:
         if self.retrieval_results is None or run_retrival:
             print(f"Called chatbot_interface - Condition Retrival")
 
-            response, updated_conversation_history, retrival_results = await self.retrival_chatbot_main(
+            response, updated_conversation_history, retrival_results, sources_list = await self.retrival_chatbot_main(
                 user_query, 
                 conversation_history
             )
@@ -226,12 +227,12 @@ class WebsiteChatBotRag:
         else:
             print(f"Called chatbot_interface - Condition NoRet")
 
-            response, updated_conversation_history, retrival_results = await self.retrival_chatbot_without_retrival(
+            response, updated_conversation_history, retrival_results, sources_list = await self.retrival_chatbot_without_retrival(
                 user_query, 
                 conversation_history
             )
         
-        return response, updated_conversation_history, retrieval_results_html
+        return response, updated_conversation_history, retrieval_results_html, self.sources_list
     
     async def converser_main(self, user_query, conversation_history):
         
@@ -240,13 +241,14 @@ class WebsiteChatBotRag:
         response = "" 
         updated_conversation_history = conversation_history 
         retrieval_results_html = self.retrieval_results
+        sources_list = ["None", "None"]
         
         try:
             if self.conversation_history == []:
                 print(f"Called converser - Condition Retriver")
 
                 # Call retriver enabled function
-                response, updated_conversation_history, retrieval_results_html = await self.gradio_chatbot_interface(
+                response, updated_conversation_history, retrieval_results_html, sources_list = await self.gradio_chatbot_interface(
                     user_query=user_query,
                     conversation_history=conversation_history,
                     run_retrival=True)
@@ -255,15 +257,15 @@ class WebsiteChatBotRag:
                 # Call no retriver function
                 print(f"Called Converser - Condition NoRet")
 
-                response, updated_conversation_history, retrieval_results_html = await self.gradio_chatbot_interface(
+                response, updated_conversation_history, retrieval_results_html, sources_list = await self.gradio_chatbot_interface(
                     user_query, 
                     conversation_history
                 )
                 
         except Exception as e:
-            return f"[] Error in Chatbot Response Generation {str(e)}", conversation_history, self.retrieval_results
-        
-        return response, updated_conversation_history, retrieval_results_html
+            return f"[xx] Error in Chatbot Response Generation {str(e)}", conversation_history, self.retrieval_results
+        print(f"x3: {type(sources_list)}")
+        return response, updated_conversation_history, retrieval_results_html, self.sources_list
     
     
     def clear_conversation_history(self):
@@ -282,6 +284,7 @@ class ChatResponses:
         self.response = ""
         self.updated_history = [] 
         self.sources = ""
+        self.sources_list = []
         
 def get_collection_names(db_path: str) :
     """Retrieve all collection names from ChromaDB"""
@@ -370,7 +373,8 @@ def create_interface():
         async def chat_handler(message, history, collection_name):
             if collection_name:
                 chatbot.current_collection = collection_name
-            response_store.response, response_store.updated_history, response_store.sources = await chatbot.converser_main(
+                
+            response_store.response, response_store.updated_history, response_store.sources, response_store.sources_list  = await chatbot.converser_main(
                 user_query=message,
                 conversation_history=response_store.updated_history
             )
@@ -379,8 +383,11 @@ def create_interface():
             history = history or []
             history.append([message, response_store.response])
             
+            formatted_sources = "\n\n".join([f"Source {i+1}:\n{source}" for i, source in enumerate(response_store.sources_list)]) if response_store.sources else ""
+    
+            
             # Update sources if needed (you might want to add sources_output as an output)
-            return history
+            return history, formatted_sources
 
                 
         
@@ -396,7 +403,7 @@ def create_interface():
         submit_btn.click(
             fn=chat_handler,
             inputs=[msg_input, chatbox, collection_dropdown],
-            outputs=[chatbox],
+            outputs=[chatbox, sources_output],
             api_name="chat"
         ).then(
             fn=lambda: None,  # Clear input after sending
@@ -407,7 +414,7 @@ def create_interface():
         msg_input.submit(
             fn=chat_handler,
             inputs=[msg_input, chatbox, collection_dropdown],
-            outputs=[chatbox],
+            outputs=[chatbox, sources_output],
         ).then(
             fn=lambda: None,  # Clear input after sending
             outputs=[msg_input]

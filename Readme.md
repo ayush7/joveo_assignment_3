@@ -4,7 +4,8 @@
 
 - The scraping may not work for every website as I used crawl4ai which is open source but has limits when it comes to websites with good robot protection
 - The database creation takes some time as crawling, scraping and vectorization all happens at the same time - Be patient, can take upto 20-30 minutes even for 400 links
-- Context limiter has not been added so there can be some errors for larger websites. I have tried to limit it with rudimentary methods but it may still cause issues sometimes. 
+- Context limiter has not been added so there can be some errors for larger websites. I have tried to limit it with rudimentary methods but it may still cause issues sometimes.
+- Sources display might be a little limited as it currently shows the retrived text instead of the links. Can be fixed but would have been easier for review. 
 
 ## Optimizations 
 -  Added metadata fields for easy filteration during retrival. Query classification agent was having adding additional time so removes it.

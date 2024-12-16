@@ -112,6 +112,7 @@ import gradio as gr
 from agents import call_agent
 from rag.retriver import AdvanceRetriever
 import params 
+import chromadb
 import asyncio
 from career_app import run_career_app
 
@@ -121,6 +122,7 @@ class WebsiteChatBotRag:
         self.conversation_history = []
         self.retrieval_results = None
         self.current_website = None
+        self.current_collection = None
         
         
 
@@ -142,13 +144,13 @@ class WebsiteChatBotRag:
         except Exception as e:
             return f"Error processing website: {str(e)}"
 
-    async def retrival_chatbot_main(self, user_query, conversational_history=None):
+    async def retrival_chatbot_main(self, user_query, conversational_history=None, collection_name="default"):
         """Runs the chatbot with retrieval"""
         try:
             # Use the current website's retrieval results if available
             # context = self.retrieval_results or ""
             
-            adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR, collection_name="anthropic.com")
+            adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR, collection_name=self.current_collection)
             refined_results, sources_dict = await adv_retr_obj.two_step_retrieval(query=user_query)
             print(len(refined_results))
             # print(refined_results[0]["input"])
@@ -281,6 +283,11 @@ class ChatResponses:
         self.updated_history = [] 
         self.sources = ""
         
+def get_collection_names(db_path: str) :
+    """Retrieve all collection names from ChromaDB"""
+    client = chromadb.PersistentClient(path=db_path)
+    collections = client.list_collections()
+    return [collection.name for collection in collections]
 
 
 def create_interface():
@@ -300,7 +307,7 @@ def create_interface():
                 )
                 
                 delete_scraped_data_checkbox = gr.Checkbox(
-                    label="Delete Old Scraped Data"
+                    label="Delete Old Scraped Data (Recommended)"
                 )
                 delete_vector_data_checkbox = gr.Checkbox(
                     label="Delete Old Vector DB"
@@ -338,8 +345,18 @@ def create_interface():
                         scale=9
                     )
                     submit_btn = gr.Button("Send", variant="primary", scale=1)
-                    clear_btn = gr.Button("Clear History", variant="secondary")
+                    # clear_btn = gr.Button("Clear History", variant="secondary")
                 
+                collection_dropdown = gr.Dropdown(
+                    choices=get_collection_names(params.RAG_DATABASE_DIR),
+                    label="Select Collection",
+                    interactive=True
+                )
+                
+                # Add collection refresh 
+                refresh_collections_btn = gr.Button("Refresh Collections")
+
+
                 # Sources section
                 with gr.Accordion("Sources", open=False):
                     sources_output = gr.Textbox(
@@ -350,7 +367,9 @@ def create_interface():
                     )
 
         # Chat handler function
-        async def chat_handler(message, history):
+        async def chat_handler(message, history, collection_name):
+            if collection_name:
+                chatbot.current_collection = collection_name
             response_store.response, response_store.updated_history, response_store.sources = await chatbot.converser_main(
                 user_query=message,
                 conversation_history=response_store.updated_history
@@ -376,7 +395,7 @@ def create_interface():
         # Handle message submission with updated chat handler
         submit_btn.click(
             fn=chat_handler,
-            inputs=[msg_input, chatbox],
+            inputs=[msg_input, chatbox, collection_dropdown],
             outputs=[chatbox],
             api_name="chat"
         ).then(
@@ -387,20 +406,26 @@ def create_interface():
         # Also trigger on Enter key with updated chat handler
         msg_input.submit(
             fn=chat_handler,
-            inputs=[msg_input, chatbox],
+            inputs=[msg_input, chatbox, collection_dropdown],
             outputs=[chatbox],
         ).then(
             fn=lambda: None,  # Clear input after sending
             outputs=[msg_input]
         )
-        
+        def refresh_collections():
+            return gr.Dropdown(choices=get_collection_names(params.RAG_DATABASE_DIR))
+            
+        refresh_collections_btn.click(
+                fn=refresh_collections,
+                outputs=[collection_dropdown]
+            )
 
         
-        # Clear context button handler
-        clear_btn.click(
-            fn=chatbot.clear_conversation_history,
-            outputs=[status_output, chatbox, sources_output]
-        )
+        # # Clear context button handler
+        # clear_btn.click(
+        #     fn=chatbot.clear_conversation_history,
+        #     outputs=[status_output, chatbox, sources_output]
+        # )
         
         # Update sources after each chat interaction
         def update_sources(message, chat_history):

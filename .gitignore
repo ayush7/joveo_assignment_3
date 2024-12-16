@@ -1,6 +1,9 @@
 /.DS_Store
 /.venvjov
 
+.cache_old
+.ragdb_2
+.ragdb_old
 # Custom User files
 key.py
 .ragdb

@@ -51,11 +51,14 @@ class OpenAICaller:
     
 
     def multi_turn_chat(self, context, agent, turn_prompt = "tell me more" ,conversation_history=None):
+        
         if conversation_history is None:
+        
             conversation_history = []
 
             system_prompt, user_prompt, replace_keyword = agent_prompts(agent=agent)
             system_prompt = system_prompt.replace(replace_keyword, str(context))
+            
             user_prompt = user_prompt.replace("[QUERY]", turn_prompt)
             
             # Add initial system and user prompts to the conversation history

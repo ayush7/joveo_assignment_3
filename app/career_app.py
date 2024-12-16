@@ -44,6 +44,8 @@ async def scrape_pages_func(links_dict, list_of_links:list = [], link_titles_lis
     list_of_links = []
     link_titles_list = []
     link_category_list = []
+    scrape_status_dict = []
+    saved_db = None 
     
     for link_item in links_dict["categorised_links"]:
         list_of_links.append(link_item["link"])
@@ -160,11 +162,16 @@ async def run_career_app(url, delete_old_cache = True, delete_persistent_db = Tr
     with open(unique_links_save_path, 'w', encoding='utf-8') as ff:
         json.dump(unique_links,ff, indent=4)
     
-    print(len(list_of_links))
+    # print(len(unique_links[""]))
 
     
     # # Run the scraper to scrape pages 
     scrape_status_list, saved_scraped_db = await scrape_pages_func(unique_links,list_of_links[:20], link_titles[:20])
+    
+    if saved_scraped_db is None:
+        print("No Links were found by the crawler")
+        return "No Links Found"
+    
     
     collection_name = primary_domain = str(tldextract.extract(url).registered_domain)
     
@@ -181,7 +188,7 @@ async def run_career_app(url, delete_old_cache = True, delete_persistent_db = Tr
     
     
     print(f"{scrape_status_dict} \n\n\n\n RAG DB CREATED. DONE")
-    return 
+    return f"""{url} \n\n\n\n RAG DB CREATED. DONE. Total Scraped Links {len(unique_links["categorised_links"])}"""
 
 
 

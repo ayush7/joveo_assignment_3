@@ -17,7 +17,8 @@ if __name__=="__main__":
     
     # # Run scraping+vectorization 
     # vectorization_start_time = time.time()
-    # asyncio.run(career_app.run_career_app(params.DEFAULT_WEBSITE, delete_old_cache = True))
+    # website = "https://www.paulgraham.com/" #params.DEFAULT_WEBSITE
+    # asyncio.run(career_app.run_career_app(website, delete_old_cache = True, create_vector_db=False))
     # print(f"Total time for Vectorization {time.time() - vectorization_start_time}")
     
     

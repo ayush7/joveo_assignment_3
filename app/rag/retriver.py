@@ -46,14 +46,14 @@ class AdvanceRetriever:
         )
 
 
-    def two_step_retrieval(self, query):
+    async def two_step_retrieval(self, query):
         # Initial retrieval
         initial_results = self.db.similarity_search(query, 
-                                         k=params.RETRIVAL_SIMILARITY_SEARCH_RESULTS, 
-                                         filter=None   # Add filter dictionary here if you want to filter from metadata
+                                         k=20, 
+                                        #  filter=None   # Add filter dictionary here if you want to filter from metadata
                                          )
         
-        # print(initial_results[0])
+        print("Initial Results: ",len(initial_results))
         sources_dict = {'1':'234'} #Placeholder for testing rn 
         # for item in initial_results:
         #     sources_dict[f'{item["sources"]}'] = item["content-link"]
@@ -62,14 +62,16 @@ class AdvanceRetriever:
         print(initial_results)
         # Refine results
         print("Refining results")
-        refined_results = self.refine_results(initial_results, query)
+        refined_results = await self.refine_results(results=initial_results, query=query)
+        
+        print("Returning RAG Results" )
         return refined_results, sources_dict
 
-    def refine_results(self, results, query):
+    async def refine_results(self, results, query):
     # Cross encoder based scoring -> Get top 10 results maybe
         print("Starting Reranking")
         model_inputs = [(query, result.page_content) for result in results]
-        
+        print(f"serach results: {len(model_inputs)}")
         # print(model_inputs)
         scores = self.model.predict(model_inputs)
 
@@ -79,13 +81,13 @@ class AdvanceRetriever:
 
         print("Query:", query)
 
-        # scores = set()
-        # for hit in results:
-        #     scores.add(hit["score"])
-        # print(scores)
+        scores = set()
+        for hit in results:
+            scores.add(hit["score"])
+        print(scores)
         # print(results[0:1])
         
-        return results[:params.RETRIVAL_CROSS_ENCODER_RESULTS]
+        return results[:10]
 
 class QueryHandler:
     def __init__(self, database_path):

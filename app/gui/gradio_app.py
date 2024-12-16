@@ -125,30 +125,20 @@ class WebsiteChatBotRag:
         
 
 
-    async def process_website(self, website_url):
+    async def process_website(self, website_url,delete_old_cache=False,
+                           delete_persistent_db=False,
+                           create_vector_db=True):
         """Process the website for retrieval - Scrapes and stores website"""
         try:
             
             
-            await run_career_app(url=website_url, 
-                           delete_old_cache=False,
-                           delete_persistent_db=False,
+            x = await run_career_app(url=website_url, 
+                           delete_old_cache=delete_old_cache,
+                           delete_persistent_db=delete_persistent_db,
                            create_vector_db=True)
-            # # Advance Retriever
-            # adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR)
+
             
-            # # Store the current website for reference
-            # self.current_website = website_url
-            
-            # # Perform initial retrieval about the website
-            # initial_query = f"Tell me about the website {website_url} and what are the different sections in the website."
-            # results = adv_retr_obj.two_step_retrieval(query=initial_query)
-            
-            # # Convert results to list of strings
-            # r = [str(item["input"]) for item in results]
-            # self.retrieval_results = r
-            
-            return f"Website {website_url} processed successfully!"
+            return f"Website {website_url} processed successfully!\nMessage: {x}"
         except Exception as e:
             return f"Error processing website: {str(e)}"
 
@@ -156,19 +146,31 @@ class WebsiteChatBotRag:
         """Runs the chatbot with retrieval"""
         try:
             # Use the current website's retrieval results if available
-            context = self.retrieval_results or []
+            # context = self.retrieval_results or ""
             
-            # Prepare conversation history
-            if conversational_history is None:
-                conversational_history = []
+            adv_retr_obj = AdvanceRetriever(params.RAG_DATABASE_DIR, collection_name="anthropic.com")
+            refined_results, sources_dict = await adv_retr_obj.two_step_retrieval(query=user_query)
+            print(len(refined_results))
+            # print(refined_results[0]["input"])
+            
+            r = []
+            for item in refined_results:
+                r.append(str(item["input"]))
+            
+            context = r 
+            
+            # # Prepare conversation history
+            # if conversational_history is None or conversational_history==[]:
+            #     conversational_history = []
             
             # OpenAI agent call
+            
+            print("Calling OpenAI ")
             opeai_obj = call_agent.OpenAICaller()
             reply, updated_conversation_history = opeai_obj.multi_turn_chat(
                 context=context, 
                 agent="rag_chatbot", 
-                turn_prompt=user_query,
-                conversation_history=conversational_history
+                turn_prompt=user_query
             )
             
             # Update conversation history
@@ -205,22 +207,65 @@ class WebsiteChatBotRag:
 
     async def gradio_chatbot_interface(self, user_query, conversation_history=None, run_retrival=False):
         """Gradio interface for the chatbot"""
+        print(f"Called chatbot_interface")
+
         retrieval_results_html = None
         
         # Determine which chat method to use
-        if self.retrieval_results is not None and run_retrival:
+        
+        if self.retrieval_results is None or run_retrival:
+            print(f"Called chatbot_interface - Condition Retrival")
+
             response, updated_conversation_history, retrival_results = await self.retrival_chatbot_main(
                 user_query, 
                 conversation_history
             )
             retrieval_results_html = str(retrival_results)
         else:
+            print(f"Called chatbot_interface - Condition NoRet")
+
             response, updated_conversation_history, retrival_results = await self.retrival_chatbot_without_retrival(
                 user_query, 
                 conversation_history
             )
         
         return response, updated_conversation_history, retrieval_results_html
+    
+    async def converser_main(self, user_query, conversation_history):
+        
+        print(f"Called Converser")
+        
+        response = "" 
+        updated_conversation_history = conversation_history 
+        retrieval_results_html = self.retrieval_results
+        
+        try:
+            if self.conversation_history == []:
+                print(f"Called converser - Condition Retriver")
+
+                # Call retriver enabled function
+                response, updated_conversation_history, retrieval_results_html = await self.gradio_chatbot_interface(
+                    user_query=user_query,
+                    conversation_history=conversation_history,
+                    run_retrival=True)
+                
+            else:
+                # Call no retriver function
+                print(f"Called Converser - Condition NoRet")
+
+                response, updated_conversation_history, retrieval_results_html = await self.gradio_chatbot_interface(
+                    user_query, 
+                    conversation_history
+                )
+                
+        except Exception as e:
+            return f"[] Error in Chatbot Response Generation {str(e)}", conversation_history, self.retrieval_results
+        
+        return response, updated_conversation_history, retrieval_results_html
+    
+    
+    def clear_conversation_history(self):
+        self.conversation_history = []
 
     def clear_conversation_history(self):
         """Clear the conversation history"""
@@ -229,7 +274,17 @@ class WebsiteChatBotRag:
         self.current_website = None
         return "Conversation history and context cleared."
 
+
+class ChatResponses:
+    def __init__(self) -> None:
+        self.response = ""
+        self.updated_history = [] 
+        self.sources = ""
+        
+
+
 def create_interface():
+    response_store = ChatResponses()
     # Initialize the chatbot
     chatbot = WebsiteChatBotRag()
     
@@ -244,14 +299,28 @@ def create_interface():
                     placeholder="https://example.com"
                 )
                 
+                delete_scraped_data_checkbox = gr.Checkbox(
+                    label="Delete Old Scraped Data"
+                )
+                delete_vector_data_checkbox = gr.Checkbox(
+                    label="Delete Old Vector DB"
+                )
+                
+                # scrape_depth_dropdown = gr.Dropdown(
+                    
+                #     [str(i) for i in range(1, 6)],label="Scrape Depth"
+                    
+                # )
+                
+                
                 with gr.Row():
-                    process_btn = gr.Button("Process Website", variant="primary")
-                    clear_btn = gr.Button("Clear Context", variant="secondary")
+                    process_btn = gr.Button("Scrape and Vectorize Website", variant="primary")
+                    
                 
                 status_output = gr.Textbox(
                     label="Status",
                     interactive=False,
-                    show_copy_button=True
+                    show_copy_button=False
                 )
             
             # Right column for chat interface
@@ -269,25 +338,42 @@ def create_interface():
                         scale=9
                     )
                     submit_btn = gr.Button("Send", variant="primary", scale=1)
+                    clear_btn = gr.Button("Clear History", variant="secondary")
                 
                 # Sources section
                 with gr.Accordion("Sources", open=False):
                     sources_output = gr.Textbox(
                         label="Relevant Sources",
                         interactive=False,
-                        lines=3,
+                        
                         show_copy_button=True
                     )
 
         # Chat handler function
         async def chat_handler(message, history):
-            response, updated_history, _ = await chatbot.gradio_chatbot_interface(
-                message,
-                conversation_history=history
+            response_store.response, response_store.updated_history, response_store.sources = await chatbot.converser_main(
+                user_query=message,
+                conversation_history=response_store.updated_history
             )
-            return response
+            
+            # Format the history correctly by adding the new message pair
+            history = history or []
+            history.append([message, response_store.response])
+            
+            # Update sources if needed (you might want to add sources_output as an output)
+            return history
 
-        # Handle message submission
+                
+        
+        # Process website button handler
+        process_btn.click(
+            fn=chatbot.process_website,
+            inputs=[url_input, delete_scraped_data_checkbox, delete_vector_data_checkbox],
+            outputs=[status_output]
+        )
+        
+        
+        # Handle message submission with updated chat handler
         submit_btn.click(
             fn=chat_handler,
             inputs=[msg_input, chatbox],
@@ -298,7 +384,7 @@ def create_interface():
             outputs=[msg_input]
         )
 
-        # Also trigger on Enter key
+        # Also trigger on Enter key with updated chat handler
         msg_input.submit(
             fn=chat_handler,
             inputs=[msg_input, chatbox],
@@ -308,12 +394,7 @@ def create_interface():
             outputs=[msg_input]
         )
         
-        # Process website button handler
-        process_btn.click(
-            fn=chatbot.process_website,
-            inputs=[url_input],
-            outputs=[status_output]
-        )
+
         
         # Clear context button handler
         clear_btn.click(

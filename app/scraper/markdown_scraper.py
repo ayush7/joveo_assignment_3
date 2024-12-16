@@ -20,8 +20,13 @@ async def markdown_scrape(url):
                             ) as crawler:
         result = await crawler.arun(
             url=url,
+            page_timeout=10000,  
             # cache_mode=CacheMode.BYPASS,
             magic=True,
+            # word_count_threshold=10,        # Minimum words per content block
+            # exclude_external_links=True,    # Remove external links
+            # remove_overlay_elements=True,   # Remove popups/modals
+            # process_iframes=True            # Process iframe content
             # delay_before_return_html=2.0,    
             # excluded_tags=['form', 'header', 'footer'],
             # keep_data_attributes=False,
